@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/han?useSSL=false&serverTimezone=Asia/Seoul
+    username: han
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+jwt:
+  secret: J#9r$X1k8Lp2!I7BzvF8kS@lR^mZ@88pP2tQq5A7  # JWT 비밀 키 (직접 설정)
+  expiration: 3600000
