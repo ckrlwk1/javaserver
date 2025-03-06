@@ -33,6 +33,12 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
+          name: Docker login
+          command: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # 환경 변수로 로그인
+#      - run:
+#        name: Docker login
+#        command: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # 환경 변수로 로그인
+      - run:
           name: Build Docker image
           command: |
             docker build -t springboot-app:latest .
