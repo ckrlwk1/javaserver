@@ -21,6 +21,7 @@ public class UserController {
 
     @RequestMapping("/api/user/login")
     public ResponseEntity<?> loginTest(@RequestBody UserVo userVo) throws Exception {
+        // 33
         return ApiResponseUtil.getOkResponseEntity(userService.login(userVo));
     }
 
