@@ -25,25 +25,22 @@ jobs:
           command: ./gradlew bootJar
 
   docker_build:
-    executor: java-executor  # 추가된 executor
     docker:
-      - image: openjdk:17-alpine
+      - image: openjdk:17-alpine  # Docker 컨테이너에서 사용할 이미지를 명시
     steps:
       - checkout
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: true  # Docker 캐시 활용
       - run:
           name: Build Docker image
           command: |
             docker build -t springboot-app:latest .
 
   docker_run:
-    executor: java-executor  # 추가된 executor
-    docker:
-      - image: openjdk:17-alpine
+    docker: []  # Docker 이미지를 명시하지 않음 (setup_remote_docker만 사용)
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true
+          docker_layer_caching: true  # Docker 환경 활성화
       - run:
           name: Run Docker container
           command: |
