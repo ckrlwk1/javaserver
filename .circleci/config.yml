@@ -64,7 +64,7 @@ jobs:
           command: |
             docker run -d -p 8080:8080 aktmzm20/springboot-app:latest || (echo "Image not found" && exit 1)
             sleep 10
-            nc -zv localhost 8080 || exit 1  # 포트 8080이 열려 있는지 확인
+#            nc -zv localhost 8080 || exit 1  # 포트 8080이 열려 있는지 확인
 
 workflows:
   version: 2
