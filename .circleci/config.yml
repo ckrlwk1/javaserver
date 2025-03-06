@@ -1,0 +1,41 @@
+version: 2.1
+
+executors:
+  java-executor:
+    docker:
+      - image: circleci/openjdk:17-jdk  # JDK 17이 포함된 Docker 이미지
+    working_directory: ~/repo
+
+jobs:
+  build:
+    executor: java-executor
+    steps:
+      - checkout  # Git 리포지토리에서 코드 체크아웃
+      - run:
+          name: Install dependencies and build
+          command: ./gradlew clean build -x test  # Gradle로 의존성 설치 및 빌드 (테스트 제외)
+      - run:
+          name: Run tests
+          command: ./gradlew test  # Gradle로 테스트 실행
+      - run:
+          name: Build jar
+          command: ./gradlew bootJar  # Gradle로 JAR 파일 빌드
+
+  deploy:
+    executor: java-executor
+    steps:
+      - checkout  # Git 리포지토리에서 코드 체크아웃
+      - run:
+          name: Deploy the application
+          command: |
+            echo "Deploying Spring Boot Application"  # 배포 스크립트 추가
+            # 실제 배포 명령어 예: SSH를 통해 서버에 파일 전송 또는 클라우드 서비스 사용
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build  # 빌드 작업 실행
+      - deploy:
+          requires:
+            - build  # 빌드 작업이 완료된 후 배포 작업 실행
