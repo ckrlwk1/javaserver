@@ -35,7 +35,7 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            docker build -t springboot-app:latest .
+            docker build -t springboot-app:latest .  # 이미지 빌드
             docker tag springboot-app:latest myrepo/springboot-app:latest  # 태그 추가 (확인용)
             docker images  # 빌드된 이미지 확인
 
@@ -45,15 +45,10 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: Load Docker image (if needed)
-          command: |
-            docker images  # 빌드된 이미지 확인
-            docker pull myrepo/springboot-app:latest || echo "Image not found, proceeding..."
-      - run:
           name: Run Docker container
           command: |
             docker images  # 빌드된 이미지 확인
-            docker run -d -p 8080:8080 myrepo/springboot-app:latest || (echo "Image not found" && exit 1)
+            docker run -d -p 8080:8080 springboot-app:latest || (echo "Image not found" && exit 1)
             sleep 10
             curl -f http://localhost:8080 || exit 1
 
