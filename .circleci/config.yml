@@ -3,42 +3,29 @@ version: 2.1
 executors:
   java-executor:
     docker:
-      - image: openjdk:17-jdk  # OpenJDK 17 이미지를 사용
-    working_directory: ~/repo  # 작업 디렉토리 설정
+      - image: openjdk:17-alpine  # Alpine 기반 이미지 사용
+    working_directory: ~/repo
 
 jobs:
   build:
     executor: java-executor
     steps:
-      - checkout  # Git 리포지토리에서 코드 체크아웃
+      - checkout
       - run:
           name: Install xargs (coreutils)
-          command: apt-get update && apt-get install -y coreutils  # sudo 없이 실행
+          command: apk update && apk add coreutils  # apk를 사용하여 coreutils 설치
       - run:
           name: Build the application
-          command: ./gradlew clean build -x test  # Gradle로 빌드 (테스트 제외)
+          command: ./gradlew clean build -x test
       - run:
           name: Run tests
-          command: ./gradlew test  # Gradle로 테스트 실행
+          command: ./gradlew test
       - run:
           name: Build bootJar
-          command: ./gradlew bootJar  # Spring Boot JAR 파일 빌드
-
-  deploy:
-    executor: java-executor
-    steps:
-      - checkout  # Git 리포지토리에서 코드 체크아웃
-      - run:
-          name: Deploy the application
-          command: |
-            echo "Deploying Spring Boot Application"  # 배포 명령어 예시
-            # 실제 배포 명령어: SSH를 통해 서버에 파일 전송 또는 클라우드 서비스 사용
+          command: ./gradlew bootJar
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build  # 빌드 작업 실행
-      - deploy:
-          requires:
-            - build  # 빌드 작업이 완료된 후 배포 작업 실행
+      - build
