@@ -7,24 +7,24 @@ executors:
     working_directory: ~/repo
 
 jobs:
-#  build:
-#    executor: docker-executor
-#    steps:
-#      - checkout
-#      - setup_remote_docker:
-#          docker_layer_caching: true
-#      - run:
-#          name: Install dependencies
-#          command: apk add --no-cache openjdk17 gradle
-#      - run:
-#          name: Build the application
-#          command: ./gradlew clean build -x test
-#      - run:
-#          name: Run tests
-#          command: ./gradlew test
-#      - run:
-#          name: Build bootJar
-#          command: ./gradlew bootJar
+  build:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Install dependencies
+          command: apk add --no-cache openjdk17 gradle
+      - run:
+          name: Build the application
+          command: ./gradlew clean build -x test
+      - run:
+          name: Run tests
+          command: ./gradlew test
+      - run:
+          name: Build bootJar
+          command: ./gradlew bootJar
 
   docker_build:
     executor: docker-executor
