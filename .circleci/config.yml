@@ -13,7 +13,7 @@ jobs:
       - checkout  # Git 리포지토리에서 코드 체크아웃
       - run:
           name: Install xargs (coreutils)
-          command: sudo apt-get update && sudo apt-get install -y coreutils  # xargs를 포함한 coreutils 설치
+          command: apt-get update && apt-get install -y coreutils  # sudo 없이 실행
       - run:
           name: Build the application
           command: ./gradlew clean build -x test  # Gradle로 빌드 (테스트 제외)
