@@ -11,21 +11,55 @@ jobs:
     executor: java-executor
     steps:
       - checkout
+      # Install coreutils (xargs 설치)
       - run:
           name: Install xargs (coreutils)
-          command: apk update && apk add coreutils  # apk를 사용하여 coreutils 설치
+          command: apk update && apk add coreutils
+
+      # Build the application (테스트 제외하고 빌드)
       - run:
-          name: Build the application
+          name: Build the application (excluding tests)
           command: ./gradlew clean build -x test
+
+      # Run tests
       - run:
-          name: Run tests
+          name: Run unit tests
           command: ./gradlew test
+
+      # Build Spring Boot JAR
       - run:
           name: Build bootJar
           command: ./gradlew bootJar
+
+  docker_build:
+    executor: java-executor
+    steps:
+      # Build Docker image from the application
+      - checkout
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t springboot-app:latest .  # Docker 이미지 빌드
+
+  docker_run:
+    executor: java-executor
+    steps:
+      # Run Docker container locally on port 8080
+      - run:
+          name: Run Docker container
+          command: |
+            docker run -d -p 8080:8080 springboot-app:latest  # 8080 포트로 Docker 컨테이너 실행
+            sleep 10  # Docker 컨테이너가 시작될 시간을 기다림
+            curl -f http://localhost:8080 || exit 1  # 애플리케이션이 정상적으로 실행되는지 확인
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
       - build
+      - docker_build:
+          requires:
+            - build  # build job이 끝난 후 실행
+      - docker_run:
+          requires:
+            - docker_build  # docker_build job이 끝난 후 실행
