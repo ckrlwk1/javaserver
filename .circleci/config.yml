@@ -34,7 +34,9 @@ jobs:
           docker_layer_caching: true
       - run:
           name: Build Docker image
-          command: docker build -t springboot-app:latest .
+          command: |
+            docker build -t springboot-app:latest .  
+            docker images  # 빌드된 이미지 확인 (디버깅)
 
   docker_run:
     executor: docker-executor
