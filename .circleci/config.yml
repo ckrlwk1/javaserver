@@ -42,13 +42,13 @@ jobs:
           name: Build Docker image
           command: |
             docker build -t springboot-app:latest .
-            docker tag springboot-app:latest myrepo/springboot-app:latest  # 태그 추가
+            docker tag springboot-app:latest aktmzm20/springboot-app:latest  # 태그 추가
             docker images  # 빌드된 이미지 확인
       - run:
           name: Push Docker image to Docker Hub
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # Docker Hub 로그인
-            docker push myrepo/springboot-app:latest  # Docker Hub로 푸시
+            docker push aktmzm20/springboot-app:latest  # Docker Hub로 푸시
 
   docker_run:
     executor: docker-executor
@@ -58,11 +58,11 @@ jobs:
       - run:
           name: Pull Docker image
           command: |
-            docker pull myrepo/springboot-app:latest || echo "Image not found, proceeding..."
+            docker pull aktmzm20/springboot-app:latest || echo "Image not found, proceeding..."
       - run:
           name: Run Docker container
           command: |
-            docker run -d -p 8080:8080 myrepo/springboot-app:latest || (echo "Image not found" && exit 1)
+            docker run -d -p 8080:8080 aktmzm20/springboot-app:latest || (echo "Image not found" && exit 1)
             sleep 10
             curl -f http://localhost:8080 || exit 1
 
