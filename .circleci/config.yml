@@ -25,28 +25,27 @@ jobs:
           command: ./gradlew bootJar
 
   docker_build:
-    docker:
-      - image: openjdk:17-alpine  # Docker 컨테이너에서 사용할 이미지를 명시
+    executor: java-executor  # 동일한 executor 사용
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true  # Docker 캐시 활용
+      - setup_remote_docker:  # Docker 환경 설정
+          docker_layer_caching: true  # Docker 캐시 활성화
       - run:
           name: Build Docker image
           command: |
-            docker build -t springboot-app:latest .
+            docker build -t springboot-app:latest .  # Docker 이미지 빌드
 
   docker_run:
-    docker: []  # Docker 이미지를 명시하지 않음 (setup_remote_docker만 사용)
+    executor: java-executor  # 동일한 executor 사용
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true  # Docker 환경 활성화
+      - setup_remote_docker:  # Docker 환경 설정
+          docker_layer_caching: true  # Docker 캐시 활성화
       - run:
           name: Run Docker container
           command: |
             docker run -d -p 8080:8080 springboot-app:latest  # Docker 컨테이너 실행
             sleep 10  # 컨테이너가 시작할 때까지 대기
-            curl -f http://localhost:8080 || exit 1  # 애플리케이션이 정상적으로 실행 중인지 확인
+            curl -f http://localhost:8080 || exit 1  # 애플리케이션 정상 동작 확인
 
 workflows:
   version: 2
