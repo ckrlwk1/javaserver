@@ -44,21 +44,21 @@ jobs:
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # Docker Hub 로그인
             docker push myrepo/springboot-app:latest  # Docker Hub로 푸시
 
-    docker_run:
-      executor: docker-executor
-      steps:
-        - setup_remote_docker:
-            docker_layer_caching: true
-        - run:
-            name: Pull Docker image
-            command: |
-              docker pull myrepo/springboot-app:latest || echo "Image not found, proceeding..."
-        - run:
-            name: Run Docker container
-            command: |
-              docker run -d -p 8080:8080 myrepo/springboot-app:latest || (echo "Image not found" && exit 1)
-              sleep 10
-              curl -f http://localhost:8080 || exit 1
+  docker_run:
+    executor: docker-executor
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Pull Docker image
+          command: |
+            docker pull myrepo/springboot-app:latest || echo "Image not found, proceeding..."
+      - run:
+          name: Run Docker container
+          command: |
+            docker run -d -p 8080:8080 myrepo/springboot-app:latest || (echo "Image not found" && exit 1)
+            sleep 10
+            curl -f http://localhost:8080 || exit 1
 
 workflows:
   version: 2
