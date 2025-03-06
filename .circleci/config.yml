@@ -25,6 +25,7 @@ jobs:
           command: ./gradlew bootJar
 
   docker_build:
+    machine: true
     executor: java-executor  # 동일한 executor 사용
     steps:
       - checkout
@@ -37,6 +38,7 @@ jobs:
             docker build -t springboot-app:latest .  # Docker 이미지 빌드
 
   docker_run:
+    machine: true
     executor: java-executor  # 동일한 executor 사용
     steps:
       - setup_remote_docker:  # Docker 환경 설정
