@@ -1,9 +1,9 @@
 version: 2.1
 
 executors:
-  java-executor:
+  docker-executor:
     docker:
-      - image: openjdk:17-alpine  # Alpine 기반 이미지 사용
+      - image: openjdk:17-alpine
     working_directory: ~/repo
 
 jobs:
@@ -12,8 +12,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install xargs (coreutils)
-          command: apk update && apk add coreutils  # apk를 사용하여 coreutils 설치
+          name: Install dependencies
+          command: apk update && apk add coreutils
       - run:
           name: Build the application
           command: ./gradlew clean build -x test
@@ -25,31 +25,34 @@ jobs:
           command: ./gradlew bootJar
 
   docker_build:
-    machine: true
-    executor: java-executor  # 동일한 executor 사용
+    executor: docker-executor
+    docker:
+      - image: docker:24.0  # 최신 Docker 이미지 사용
     steps:
       - checkout
       - setup_remote_docker:  # Docker 환경 설정
-          version: 19.03.13
-          docker_layer_caching: true  # Docker 캐시 활성화
+          docker_layer_caching: true
+      - run:
+          name: Install Docker CLI
+          command: apk add --no-cache docker-cli
       - run:
           name: Build Docker image
           command: |
-            docker build -t springboot-app:latest .  # Docker 이미지 빌드
+            docker build -t springboot-app:latest .
 
   docker_run:
-    machine: true
-    executor: java-executor  # 동일한 executor 사용
+    executor: docker-executor
+    docker:
+      - image: docker:24.0  # Docker 실행을 위한 환경
     steps:
-      - setup_remote_docker:  # Docker 환경 설정
-          version: 19.03.13
-          docker_layer_caching: true  # Docker 캐시 활성화
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Run Docker container
           command: |
-            docker run -d -p 8080:8080 springboot-app:latest  # Docker 컨테이너 실행
-            sleep 10  # 컨테이너가 시작할 때까지 대기
-            curl -f http://localhost:8080 || exit 1  # 애플리케이션 정상 동작 확인
+            docker run -d -p 8080:8080 springboot-app:latest
+            sleep 10
+            curl -f http://localhost:8080 || exit 1
 
 workflows:
   version: 2
