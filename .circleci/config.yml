@@ -31,7 +31,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.7
           docker_layer_caching: true
       - run:
           name: Build Docker image
@@ -44,7 +43,6 @@ jobs:
       - image: openjdk:17-alpine
     steps:
       - setup_remote_docker:
-          version: 20.10.7
           docker_layer_caching: true
       - run:
           name: Run Docker container
