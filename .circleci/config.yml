@@ -29,6 +29,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:  # Docker 환경 설정
+          version: 19.03.13
           docker_layer_caching: true  # Docker 캐시 활성화
       - run:
           name: Build Docker image
@@ -39,6 +40,7 @@ jobs:
     executor: java-executor  # 동일한 executor 사용
     steps:
       - setup_remote_docker:  # Docker 환경 설정
+          version: 19.03.13
           docker_layer_caching: true  # Docker 캐시 활성화
       - run:
           name: Run Docker container
