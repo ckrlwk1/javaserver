@@ -47,6 +47,7 @@ jobs:
       - run:
           name: Load Docker image (if needed)
           command: |
+            docker images  # 빌드된 이미지 확인
             docker pull myrepo/springboot-app:latest || echo "Image not found, proceeding..."
       - run:
           name: Run Docker container
