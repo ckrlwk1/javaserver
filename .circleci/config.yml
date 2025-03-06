@@ -1,19 +1,21 @@
 version: 2.1
 
 executors:
-  java-executor:
+  docker-executor:
     docker:
-      - image: openjdk:17-alpine
+      - image: docker:24.0  # Docker가 포함된 환경
     working_directory: ~/repo
 
 jobs:
   build:
-    executor: java-executor
+    executor: docker-executor
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Install dependencies
-          command: apk update && apk add coreutils
+          command: apk add --no-cache openjdk17 gradle
       - run:
           name: Build the application
           command: ./gradlew clean build -x test
@@ -26,24 +28,16 @@ jobs:
 
   docker_build:
     executor: docker-executor
-    docker:
-      - image: docker:24.0  # 최신 Docker 이미지 사용
     steps:
       - checkout
-      - setup_remote_docker:  # Docker 환경 설정
+      - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: Install Docker CLI
-          command: apk add --no-cache docker-cli
-      - run:
           name: Build Docker image
-          command: |
-            docker build -t springboot-app:latest .
+          command: docker build -t springboot-app:latest .
 
   docker_run:
     executor: docker-executor
-    docker:
-      - image: docker:24.0  # Docker 실행을 위한 환경
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
