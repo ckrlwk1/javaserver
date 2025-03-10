@@ -3,46 +3,50 @@ version: 2.1
 executors:
   docker-executor:
     docker:
-      - image: openjdk:17-alpine  # OpenJDK 17 이미지 사용
-    working_directory: ~/repo
-
-  alpine-executor:
-    docker:
-      - image: alpine:latest  # Alpine Linux 기반 이미지
+      - image: docker:24.0  # Docker 환경
     working_directory: ~/repo
 
 jobs:
   build:
     executor: docker-executor
     steps:
-      - checkout  # GitHub에서 소스 코드 가져오기
+      - checkout
       - run:
-          name: Install unzip and SDKMAN, then Gradle
-          command: |
-            apk update  # apk 패키지 업데이트
-            apk add --no-cache unzip curl bash  # unzip, curl, bash 설치
-            curl -s "https://get.sdkman.io" | bash  # SDKMAN 설치
-            source "$HOME/.sdkman/bin/sdkman-init.sh"  # SDKMAN 초기화
-            sdk install gradle  # SDKMAN으로 Gradle 설치
+          name: Install dependencies
+          command: apk add --no-cache openjdk17 gradle
       - run:
-          name: Build Spring Boot Application with Gradle
-          command: ./gradlew clean build -x test  # Gradle로 빌드
+          name: Build the application
+          command: ./gradlew clean build -x test
+      - run:
+          name: Run tests
+          command: ./gradlew test
+      - run:
+          name: Build bootJar
+          command: ./gradlew bootJar
 
   docker_build:
     executor: docker-executor
     steps:
       - checkout
       - run:
-          name: Build Docker Image
-          command: ./gradlew buildDocker  # Gradle을 통해 Docker 이미지 빌드
+          name: Docker login
+          command: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # Docker Hub 로그인
       - run:
-          name: Push Docker Image to DockerHub
+          name: Build Docker image
           command: |
-            docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-            docker push aktmzm20/springboot-app:${CIRCLE_SHA1}
+            docker build -t springboot-app:latest .
+            docker tag springboot-app:latest aktmzm20/springboot-app:latest
+            docker images
+      - run:
+          name: Push Docker image to Docker Hub
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+            docker push aktmzm20/springboot-app:latest
 
   deploy:
-    executor: alpine-executor  # Alpine 이미지 사용
+    executor: docker-executor
+    docker:
+      - image: circleci/python:3.8  # kubectl을 사용할 수 있는 이미지
     steps:
       - checkout
       - run:
@@ -52,10 +56,14 @@ jobs:
             chmod +x ./kubectl
             sudo mv ./kubectl /usr/local/bin/kubectl
       - run:
+          name: Set up Kubernetes config
+          command: |
+            echo "$KUBE_CONFIG" > ~/.kube/config  # KUBE_CONFIG 환경 변수를 사용하여 Kubernetes config 설정
+      - run:
           name: Apply Kubernetes Manifests
           command: |
-            kubectl apply -f deployment.yml
-            kubectl apply -f service.yml
+            kubectl apply -f deployment.yaml
+            kubectl apply -f service.yaml
 
 workflows:
   version: 2
