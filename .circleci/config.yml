@@ -3,7 +3,7 @@ version: 2.1
 executors:
   docker-executor:
     docker:
-      - image: openjdk:17-jdk  # OpenJDK 17 이미지 사용
+      - image: openjdk:17-alpine  # OpenJDK 17 이미지 사용
     working_directory: ~/repo
 
   alpine-executor:
