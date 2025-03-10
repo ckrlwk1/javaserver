@@ -8,7 +8,7 @@ executors:
 
   kubectl-executor:
     docker:
-      - image: circleci/python:3.8  # kubectl을 사용할 수 있는 이미지
+      - image: python:3.8-alpine  # Alpine 이미지 사용
     working_directory: ~/repo
 
 jobs:
@@ -19,8 +19,6 @@ jobs:
       - run:
           name: Install unzip and SDKMAN, then Gradle
           command: |
-            apt-get update
-            apt-get install -y unzip  # unzip 설치
             curl -s "https://get.sdkman.io" | bash
             source "$HOME/.sdkman/bin/sdkman-init.sh"
             sdk install gradle  # SDKMAN을 사용하여 Gradle 설치
