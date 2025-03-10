@@ -6,9 +6,9 @@ executors:
       - image: openjdk:17-jdk  # OpenJDK 17 이미지 사용
     working_directory: ~/repo
 
-  kubectl-executor:
+  alpine-executor:
     docker:
-      - image: alpine:latest  # Alpine 이미지 사용
+      - image: alpine:latest  # Alpine Linux 기반 이미지
     working_directory: ~/repo
 
 jobs:
@@ -19,11 +19,11 @@ jobs:
       - run:
           name: Install unzip and SDKMAN, then Gradle
           command: |
-            # apk 사용하여 unzip과 SDKMAN 설치
-            apk add --no-cache unzip curl bash
-            curl -s "https://get.sdkman.io" | bash
-            source "$HOME/.sdkman/bin/sdkman-init.sh"
-            sdk install gradle  # SDKMAN을 사용하여 Gradle 설치
+            apk update  # apk 패키지 업데이트
+            apk add --no-cache unzip curl bash  # unzip, curl, bash 설치
+            curl -s "https://get.sdkman.io" | bash  # SDKMAN 설치
+            source "$HOME/.sdkman/bin/sdkman-init.sh"  # SDKMAN 초기화
+            sdk install gradle  # SDKMAN으로 Gradle 설치
       - run:
           name: Build Spring Boot Application with Gradle
           command: ./gradlew clean build -x test  # Gradle로 빌드
@@ -42,7 +42,7 @@ jobs:
             docker push aktmzm20/springboot-app:${CIRCLE_SHA1}
 
   deploy:
-    executor: kubectl-executor
+    executor: alpine-executor  # Alpine 이미지 사용
     steps:
       - checkout
       - run:
