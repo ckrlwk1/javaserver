@@ -8,7 +8,7 @@ executors:
 
   kubectl-executor:
     docker:
-      - image: python:3.8-alpine  # Alpine 이미지 사용
+      - image: alpine:latest  # Alpine 이미지 사용
     working_directory: ~/repo
 
 jobs:
