@@ -19,6 +19,8 @@ jobs:
       - run:
           name: Install unzip and SDKMAN, then Gradle
           command: |
+            # apk 사용하여 unzip과 SDKMAN 설치
+            apk add --no-cache unzip curl bash
             curl -s "https://get.sdkman.io" | bash
             source "$HOME/.sdkman/bin/sdkman-init.sh"
             sdk install gradle  # SDKMAN을 사용하여 Gradle 설치
