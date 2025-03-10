@@ -1,10 +1,11 @@
+# Service 설정 (LoadBalancer 또는 ClusterIP)
 apiVersion: v1
 kind: Service
 metadata:
-  name: springboot-service
+  name: springboot-app-service
 spec:
   selector:
-    app: springboot
+    app: springboot-app
   ports:
     - protocol: TCP
       port: 80

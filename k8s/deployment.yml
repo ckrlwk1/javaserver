@@ -1,3 +1,4 @@
+# Deployment 설정 (Pod 관리를 담당)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,14 +7,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: springboot
+      app: springboot-app
   template:
     metadata:
       labels:
-        app: springboot
+        app: springboot-app
     spec:
       containers:
         - name: springboot-app
-          image: springboot-app:latest
+          image: aktmzm20/springboot-app:latest  # Docker 이미지
           ports:
             - containerPort: 8080
