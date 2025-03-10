@@ -6,26 +6,28 @@ executors:
       - image: openjdk:17-jdk  # OpenJDK 17 이미지 사용
     working_directory: ~/repo
 
+  kubectl-executor:
+    docker:
+      - image: circleci/python:3.8  # kubectl을 사용할 수 있는 이미지
+    working_directory: ~/repo
+
 jobs:
   build:
     executor: docker-executor
     steps:
       - checkout  # GitHub에서 소스 코드 가져오기
       - run:
-          name: Install Gradle
+          name: Install SDKMAN and Gradle
           command: |
-            curl -sSL https://get.gradle.org/download/gradle-7.4-bin.zip -o gradle.zip
-            unzip gradle.zip
-            sudo mv gradle-7.4 /opt/gradle
-            export PATH=$PATH:/opt/gradle/bin
+            curl -s "https://get.sdkman.io" | bash
+            source "$HOME/.sdkman/bin/sdkman-init.sh"
+            sdk install gradle  # SDKMAN을 사용하여 Gradle 설치
       - run:
           name: Build Spring Boot Application with Gradle
           command: ./gradlew clean build -x test  # Gradle로 빌드
 
   docker_build:
     executor: docker-executor
-    docker:
-      - image: circleci/openjdk:17  # Docker 빌드를 위한 OpenJDK 17
     steps:
       - checkout
       - run:
@@ -38,9 +40,7 @@ jobs:
             docker push aktmzm20/springboot-app:${CIRCLE_SHA1}
 
   deploy:
-    executor: docker-executor
-    docker:
-      - image: circleci/python:3.8  # kubectl을 사용할 수 있는 이미지
+    executor: kubectl-executor
     steps:
       - checkout
       - run:
