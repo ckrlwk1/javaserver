@@ -3,7 +3,7 @@ version: 2.1
 executors:
   docker-executor:
     docker:
-      - image: docker:24.0  # Docker 환경
+      - image: docker:24.0  # Docker 실행 환경
     working_directory: ~/repo
 
 jobs:
@@ -11,6 +11,8 @@ jobs:
     executor: docker-executor
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Install dependencies
           command: apk add --no-cache openjdk17 gradle
@@ -28,42 +30,47 @@ jobs:
     executor: docker-executor
     steps:
       - checkout
-      - run:
-          name: Docker login
-          command: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # Docker Hub 로그인
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
             docker build -t springboot-app:latest .
-            docker tag springboot-app:latest aktmzm20/springboot-app:latest
-            docker images
+            docker images  # 빌드된 이미지 확인
       - run:
-          name: Push Docker image to Docker Hub
+          name: Save Docker image as tar file
           command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-            docker push aktmzm20/springboot-app:latest
+            docker save -o springboot-app.tar springboot-app:latest
+      - run:
+          name: Install AWS CLI
+          command: |
+            apk add --no-cache aws-cli
+      - run:
+          name: Upload Docker image to S3 (Private)
+          command: |
+            aws s3 cp springboot-app.tar s3://your-s3-bucket-name/docker-images/springboot-app.tar --acl private
 
-  deploy:
+  docker_run:
     executor: docker-executor
-    docker:
-      - image: circleci/python:3.8  # kubectl을 사용할 수 있는 이미지
     steps:
-      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
-          name: Install kubectl
+          name: Install AWS CLI
           command: |
-            curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubectl
-            chmod +x ./kubectl
-            sudo mv ./kubectl /usr/local/bin/kubectl
+            apk add --no-cache aws-cli
       - run:
-          name: Set up Kubernetes config
+          name: Download Docker image from S3 (Private)
           command: |
-            echo "$KUBE_CONFIG" > ~/.kube/config  # KUBE_CONFIG 환경 변수를 사용하여 Kubernetes config 설정
+            aws s3 cp s3://your-s3-bucket-name/docker-images/springboot-app.tar springboot-app.tar
       - run:
-          name: Apply Kubernetes Manifests
+          name: Load Docker image
           command: |
-            kubectl apply -f deployment.yaml
-            kubectl apply -f service.yaml
+            docker load -i springboot-app.tar
+      - run:
+          name: Run Docker container
+          command: |
+            docker run -d -p 8080:8080 springboot-app:latest
 
 workflows:
   version: 2
@@ -73,6 +80,6 @@ workflows:
       - docker_build:
           requires:
             - build
-      - deploy:
+      - docker_run:
           requires:
             - docker_build
