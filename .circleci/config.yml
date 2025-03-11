@@ -62,7 +62,7 @@ jobs:
       - run:
           name: Download Docker image from S3 (Private)
           command: |
-            aws s3 cp s3://your-s3-bucket-name/docker-images/springboot-app.tar springboot-app.tar
+            aws s3 cp s3://hanseungju/docker-images/springboot-app.tar springboot-app.tar
       - run:
           name: Load Docker image
           command: |
