@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface CheckRole {
-    String[] value(); // 필요한 권한 리스트
+    String[] value(); // 필요한 권한 리스트 555
 }
