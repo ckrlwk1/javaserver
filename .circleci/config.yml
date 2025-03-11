@@ -12,6 +12,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
+          version: 20.10.7
           docker_layer_caching: true
       - run:
           name: Install dependencies
@@ -31,6 +32,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
+          version: 20.10.7
           docker_layer_caching: true
       - run:
           name: Build Docker image
@@ -44,25 +46,30 @@ jobs:
       - run:
           name: Install AWS CLI
           command: |
-            apk add --no-cache aws-cli
+            apk add --no-cache aws-cli bash
       - run:
           name: Upload Docker image to S3 (Private)
           command: |
-            aws s3 s3 cp springboot-app.tar s3://hanseungju/springboot-app.tar --acl private
+            aws s3 cp springboot-app.tar s3://hanseungju/springboot-app.tar --acl private
 
   docker_run:
     executor: docker-executor
     steps:
       - setup_remote_docker:
+          version: 20.10.7
           docker_layer_caching: true
       - run:
           name: Install AWS CLI
           command: |
-            apk add --no-cache aws-cli
+            apk add --no-cache aws-cli bash
       - run:
           name: Download Docker image from S3 (Private)
           command: |
             aws s3 cp s3://hanseungju/springboot-app.tar springboot-app.tar
+      - run:
+          name: Check if tar file exists
+          command: |
+            if [ -f "springboot-app.tar" ]; then echo "File exists"; else echo "File not found"; exit 1; fi
       - run:
           name: Load Docker image
           command: |
